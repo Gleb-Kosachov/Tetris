@@ -6,9 +6,14 @@
 //
 
 #include <iostream>
+#include <optional>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "Renderer/Renderer.hpp"
+#include "Logics.hpp"
+
+std::optional<Block> field[10 * 16];
+Construction *falling_construction;
 
 void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int &height);
 void Shutdown(SDL_Window *&w, SDL_GLContext &cont);
@@ -64,19 +69,19 @@ int main(int argc, const char * argv[]) {
                     switch (event.key.keysym.sym) {
                         case SDLK_w:
                         case SDLK_UP:
-                            //handle UP
+                            HandleUp();
                             break;
                         case SDLK_a:
                         case SDLK_LEFT:
-                            //handle LEFT
+                            HandleLeft();
                             break;
                         case SDLK_d:
                         case SDLK_RIGHT:
-                            //handle RIGHT
+                            HandleRight();
                             break;
                         case SDLK_s:
                         case SDLK_DOWN:
-                            //handle DOWN
+                            HandleDown();
                             break;
                     }
                 }
@@ -84,8 +89,7 @@ int main(int argc, const char * argv[]) {
             renderer.Clear();
             
             
-            
-            renderer.Draw(160);
+//            renderer.Draw(1);
             
             SDL_GL_SwapWindow(window);
         }
