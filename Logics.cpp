@@ -8,8 +8,17 @@
 #include "Logics.hpp"
 #include <optional>
 
-extern std::optional<Block> field[10 * 16];
+extern std::optional<Block> *field;
 extern Construction *falling_construction;
+
+Block::Block(float r, float g, float b, float a): color{r, g, b, a}
+{
+}
+
+Construction::~Construction()
+{
+    delete[] blocks;
+}
 
 void HandleUp()
 {

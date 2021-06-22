@@ -8,18 +8,16 @@
 #ifndef Logics_hpp
 #define Logics_hpp
 
-#include <stdio.h>
-
 struct Block
 {
-    int position[2];
     float color[4];
+    Block(float r, float g, float b, float a);
 };
 
 struct Construction
 {
     Block **blocks;
-    bool falling;
+    ~Construction();
 };
 
 void HandleLeft();

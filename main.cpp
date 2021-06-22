@@ -12,11 +12,33 @@
 #include "Renderer/Renderer.hpp"
 #include "Logics.hpp"
 
-std::optional<Block> field[10 * 16];
+std::optional<Block> *field;
 Construction *falling_construction;
 
 void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int &height);
 void Shutdown(SDL_Window *&w, SDL_GLContext &cont);
+
+void Display(Renderer &r)
+{
+    int quads = 0;
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            if (field[i * 10 + j].has_value())
+            {
+                r.vertices[quads * 4] = Vertex(j, i, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 1] = Vertex(j + 1, i, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 2] = Vertex(j + 1, i + 1, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 3] = Vertex(j, i + 1, field[i * 10 + j].value().color);
+                quads++;
+            }
+        }
+    }
+    r.Clear();
+    r.UploadVertices();
+    r.Draw(quads);
+}
 
 int main(int argc, const char * argv[]) {
     
@@ -86,10 +108,8 @@ int main(int argc, const char * argv[]) {
                     }
                 }
             }
-            renderer.Clear();
             
-            
-//            renderer.Draw(1);
+            Display(renderer);
             
             SDL_GL_SwapWindow(window);
         }
@@ -100,6 +120,9 @@ int main(int argc, const char * argv[]) {
 
 void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int &height)
 {
+    field = new std::optional<Block>[16 * 10];
+    for (int i = 0; i < 160; i++)
+        field[i].reset();
     if (SDL_Init(SDL_INIT_VIDEO))
     {
         std::cout << "Error initializing SDL!" << std::endl;

@@ -38,6 +38,11 @@ Vertex::Vertex(float x, float y, float r, float g, float b, float a): coordinate
 {
 }
 
+Vertex::Vertex(float x, float y, float color[4]): coordinate{x, y}
+{
+    for (int i = 0; i < 4; i++) this->color[i] = color[i];
+}
+
 Renderer::Renderer()
 {
     if (glewInit() != GLEW_OK)

@@ -17,6 +17,7 @@ struct Vertex
     float color[4];
     Vertex();
     Vertex(float x, float y, float r, float g, float b, float a);
+    Vertex(float x, float y, float color[4]);
 };
 
 class Renderer
