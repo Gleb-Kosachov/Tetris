@@ -8,13 +8,14 @@
 #include <iostream>
 #include <optional>
 #include <chrono>
+#include <array>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "Renderer/Renderer.hpp"
 #include "Logics.hpp"
 
 std::optional<Block> *field;
-Construction *falling_construction;
+Construction falling_construction;
 
 void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int &height);
 void Shutdown(SDL_Window *&w, SDL_GLContext &cont);
@@ -36,26 +37,21 @@ void Display(Renderer &r)
             }
         }
     }
-    r.Clear();
     r.UploadVertices();
+    r.Clear();
     r.Draw(quads);
 }
 
 void Drop()
 {
-    for (int i = 1; i < 16; i++)
+    for (int j = 0; j < falling_construction.size; j++)
     {
-        for (int j = 0; j < 10; j++)
-        {
-            if (field[i * 10 + j].has_value())
-            {
-                if (!field[(i - 1) * 10 + j].has_value())
-                {
-                    field[(i - 1) * 10 + j] = field[i * 10 + j];
-                    field[i * 10 + j].reset();
-                }
-            }
-        }
+        std::optional<Block> &block = field[falling_construction.blocks[j]->position[1] * 10 + falling_construction.blocks[j]->position[0]];
+        field[(block.value().position[1] - 1) * 10 + block.value().position[0]] = block.value();
+        falling_construction.blocks[j] = &field[(falling_construction.blocks[j]->position[1] - 1) * 10 + falling_construction.blocks[j]->position[0]].value();
+        block.reset();
+//        field[falling_construction.blocks[j]->position[1] * 10 + falling_construction.blocks[j]->position[0]].value().position[1]--;
+        falling_construction.blocks[j]->position[1]--;
     }
 }
 
@@ -78,6 +74,8 @@ int main(int argc, const char * argv[]) {
         int OffsetTime = 500;
         
         std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+        
+        GenConstruction();
         
         SDL_Event event;
         while (true)
@@ -141,7 +139,23 @@ int main(int argc, const char * argv[]) {
             {
                 start = std::chrono::high_resolution_clock::now();
                 Drop();
-                std::cout << "Dropping" << std::endl;
+                for (int i = 0; i < 16; i++)
+                {
+                    for (int j = 0; j < 10; j++)
+                    {
+                        std::cout << field[i * 10 + j].has_value() << " ";
+                    }
+                    std::cout << std::endl;
+                }
+                for (int i = 0; i < falling_construction.bottom_blocks_size; i++)
+                {
+                    Block &block = field[(*falling_construction.bottom_blocks[i])->position[1] * 10 + (*falling_construction.bottom_blocks[i])->position[0]].value();
+                    if (field[(block.position[1] - 1) * 10 + block.position[0]] || !block.position[1])
+                    {
+                        GenConstruction();
+                        break;
+                    }
+                }
             }
             
             Display(renderer);
@@ -158,8 +172,6 @@ void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int
     field = new std::optional<Block>[16 * 10];
     for (int i = 0; i < 160; i++)
         field[i].reset();
-    
-    field[10 * 10 + 5] = Block(0, 1, 0, 1);
     
     if (SDL_Init(SDL_INIT_VIDEO))
     {

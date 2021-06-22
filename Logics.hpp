@@ -10,17 +10,21 @@
 
 struct Block
 {
+    int position[2];
     float color[4];
-    Block(float r, float g, float b, float a);
+    Block(int x, int y, float r, float g, float b, float a);
 };
 
 struct Construction
 {
-    Block **blocks;
-    int size;
+    Block **blocks = nullptr;
+    int size = 0;
+    Block ***bottom_blocks = nullptr;
+    int bottom_blocks_size = 0;
     ~Construction();
-    void Drop();
 };
+
+void GenConstruction();
 
 void HandleLeft();
 void HandleRight();
