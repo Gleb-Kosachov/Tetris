@@ -17,12 +17,13 @@ struct Block
 struct Construction
 {
     Block **blocks;
+    int size;
     ~Construction();
+    void Drop();
 };
 
 void HandleLeft();
 void HandleRight();
-void HandleDown();
 void HandleUp();
 
 #endif /* Logics_hpp */

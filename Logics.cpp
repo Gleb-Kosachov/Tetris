@@ -7,6 +7,7 @@
 
 #include "Logics.hpp"
 #include <optional>
+#include <array>
 
 extern std::optional<Block> *field;
 extern Construction *falling_construction;
@@ -31,11 +32,6 @@ void HandleLeft()
 }
 
 void HandleRight()
-{
-    
-}
-
-void HandleDown()
 {
     
 }

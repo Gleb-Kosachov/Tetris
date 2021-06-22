@@ -97,7 +97,7 @@ namespace {
     {
         std::pair<std::string, std::string> result;
         std::ifstream vfile(vfilepath);
-        if (!vfile.is_open()) std::cout << "File not open!" << std::endl;
+        if (!vfile.is_open()) std::cout << "Error opening vertex shader!" << std::endl;
         while (!vfile.eof())
         {
             std::string temp;
@@ -105,7 +105,7 @@ namespace {
             result.first += temp + '\n';
         }
         std::ifstream ffile(ffilepath);
-        if (!ffile.is_open()) std::cout << "File not open!" << std::endl;
+        if (!ffile.is_open()) std::cout << "Error opening fragment shader!" << std::endl;
         while (!ffile.eof())
         {
             std::string temp;

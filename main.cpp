@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <optional>
+#include <chrono>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "Renderer/Renderer.hpp"
@@ -40,6 +41,24 @@ void Display(Renderer &r)
     r.Draw(quads);
 }
 
+void Drop()
+{
+    for (int i = 1; i < 16; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            if (field[i * 10 + j].has_value())
+            {
+                if (!field[(i - 1) * 10 + j].has_value())
+                {
+                    field[(i - 1) * 10 + j] = field[i * 10 + j];
+                    field[i * 10 + j].reset();
+                }
+            }
+        }
+    }
+}
+
 int main(int argc, const char * argv[]) {
     
     SDL_Window *window;
@@ -55,6 +74,10 @@ int main(int argc, const char * argv[]) {
         Renderer renderer;
         renderer.LoadShader("Shaders/vertex_shader.glsl", "Shaders/fragment_shader.glsl");
         renderer.SetMVP(proj);
+        
+        int OffsetTime = 500;
+        
+        std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
         
         SDL_Event event;
         while (true)
@@ -103,10 +126,22 @@ int main(int argc, const char * argv[]) {
                             break;
                         case SDLK_s:
                         case SDLK_DOWN:
-                            HandleDown();
+                            OffsetTime = 200;
                             break;
                     }
                 }
+                else if (event.type == SDL_KEYUP)
+                {
+                    if (event.key.keysym.sym == SDLK_DOWN)
+                        OffsetTime = 500;
+                }
+            }
+            
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() >= OffsetTime)
+            {
+                start = std::chrono::high_resolution_clock::now();
+                Drop();
+                std::cout << "Dropping" << std::endl;
             }
             
             Display(renderer);
@@ -123,6 +158,9 @@ void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int
     field = new std::optional<Block>[16 * 10];
     for (int i = 0; i < 160; i++)
         field[i].reset();
+    
+    field[10 * 10 + 5] = Block(0, 1, 0, 1);
+    
     if (SDL_Init(SDL_INIT_VIDEO))
     {
         std::cout << "Error initializing SDL!" << std::endl;
@@ -133,8 +171,7 @@ void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-//    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
+    
     w = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!w)
     {
