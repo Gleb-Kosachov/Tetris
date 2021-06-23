@@ -128,6 +128,16 @@ int main(int argc, const char * argv[]) {
                 start = std::chrono::high_resolution_clock::now();
                 Drop();
                 
+                for (int i = 15; i >= 0; i--)
+                {
+                    for (int j = 0; j < 10; j++)
+                    {
+                        std::cout << field[i * 10 + j].has_value() << " ";
+                    }
+                    std::cout << std::endl;
+                }
+                std::cout << std::endl;
+                
                 bool s = false;
                 repeat:
                 for (int i = 0; i < falling_construction.bottom_blocks_size; i++)

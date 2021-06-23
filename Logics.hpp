@@ -8,6 +8,8 @@
 #ifndef Logics_hpp
 #define Logics_hpp
 
+#include <vector>
+
 struct Block
 {
     int position[2];
@@ -21,6 +23,8 @@ struct Construction
     int size = 0;
     Block ***bottom_blocks = nullptr;
     int bottom_blocks_size = 0;
+    Block **rotation_axis;
+    int type;
     ~Construction();
 };
 
