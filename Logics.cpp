@@ -151,6 +151,60 @@ void GenConstruction()
     }
 }
 
+bool IsFalling(int x, int y)
+{
+    if (!field[y * 10 + x].has_value()) return true;
+    for (int i = 0; i < falling_construction.size; i++)
+    {
+        if (&field[y * 10 + x].value() == falling_construction.blocks[i]) return true;
+    }
+    return false;
+}
+
+void CheckFullRow()
+{
+    for (int i = 0; i < 16; i++)
+    {
+        bool full = true;
+        for (int j = 0; j < 10; j++)
+        {
+            if (!field[i * 10 + j].has_value())
+            {
+                full = false;
+                break;
+            }
+        }
+        if (full)
+        {
+            for (int j = 0; j < 10; j++)
+                field[i * 10 + j].reset();
+            for (int j = i + 1; j < 16; j++)
+            {
+                for (int o = 0; o < 10; o++)
+                {
+                    if (!IsFalling(o, j))
+                    {
+                        field[(j - 1) * 10 + o] = field[j * 10 + o];
+                        field[j * 10 + o].reset();
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Drop()
+{
+    for (int j = 0; j < falling_construction.size; j++)
+    {
+        std::optional<Block> &block = field[falling_construction.blocks[j]->position[1] * 10 + falling_construction.blocks[j]->position[0]];
+        field[(block.value().position[1] - 1) * 10 + block.value().position[0]] = block.value();
+        falling_construction.blocks[j] = &field[(falling_construction.blocks[j]->position[1] - 1) * 10 + falling_construction.blocks[j]->position[0]].value();
+        block.reset();
+        falling_construction.blocks[j]->position[1]--;
+    }
+}
+
 void HandleUp()
 {
     

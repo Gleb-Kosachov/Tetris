@@ -9,6 +9,7 @@
 #include <optional>
 #include <chrono>
 #include <array>
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "Renderer/Renderer.hpp"
@@ -40,19 +41,6 @@ void Display(Renderer &r)
     r.UploadVertices();
     r.Clear();
     r.Draw(quads);
-}
-
-void Drop()
-{
-    for (int j = 0; j < falling_construction.size; j++)
-    {
-        std::optional<Block> &block = field[falling_construction.blocks[j]->position[1] * 10 + falling_construction.blocks[j]->position[0]];
-        field[(block.value().position[1] - 1) * 10 + block.value().position[0]] = block.value();
-        falling_construction.blocks[j] = &field[(falling_construction.blocks[j]->position[1] - 1) * 10 + falling_construction.blocks[j]->position[0]].value();
-        block.reset();
-//        field[falling_construction.blocks[j]->position[1] * 10 + falling_construction.blocks[j]->position[0]].value().position[1]--;
-        falling_construction.blocks[j]->position[1]--;
-    }
 }
 
 int main(int argc, const char * argv[]) {
@@ -139,24 +127,25 @@ int main(int argc, const char * argv[]) {
             {
                 start = std::chrono::high_resolution_clock::now();
                 Drop();
-                for (int i = 0; i < 16; i++)
-                {
-                    for (int j = 0; j < 10; j++)
-                    {
-                        std::cout << field[i * 10 + j].has_value() << " ";
-                    }
-                    std::cout << std::endl;
-                }
+                
+                bool s = false;
+                repeat:
                 for (int i = 0; i < falling_construction.bottom_blocks_size; i++)
                 {
                     Block &block = field[(*falling_construction.bottom_blocks[i])->position[1] * 10 + (*falling_construction.bottom_blocks[i])->position[0]].value();
                     if (field[(block.position[1] - 1) * 10 + block.position[0]] || !block.position[1])
                     {
+                        if (s)
+                            std::exit(0);
+                        s = true;
                         GenConstruction();
+                        goto repeat;
                         break;
                     }
                 }
             }
+            
+            CheckFullRow();
             
             Display(renderer);
             
@@ -205,6 +194,7 @@ void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int
 
 void Shutdown(SDL_Window *&w, SDL_GLContext &cont)
 {
+    delete[] field;
     SDL_GL_DeleteContext(cont);
     SDL_DestroyWindow(w);
     SDL_Quit();

@@ -25,6 +25,8 @@ struct Construction
 };
 
 void GenConstruction();
+void CheckFullRow();
+void Drop();
 
 void HandleLeft();
 void HandleRight();
