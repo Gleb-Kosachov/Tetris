@@ -23,6 +23,10 @@ void Shutdown(SDL_Window *&w, SDL_GLContext &cont);
 
 void Display(Renderer &r)
 {
+    r.vertices[0] = Vertex(0, 0, 0, 0, 0, 1);
+    r.vertices[1] = Vertex(10, 0, 0, 0, 0, 1);
+    r.vertices[2] = Vertex(10, 16, 0, 0, 0, 1);
+    r.vertices[3] = Vertex(0, 16, 0, 0, 0, 1);
     int quads = 0;
     for (int i = 0; i < 16; i++)
     {
@@ -30,17 +34,17 @@ void Display(Renderer &r)
         {
             if (field[i * 10 + j].has_value())
             {
-                r.vertices[quads * 4] = Vertex(j, i, field[i * 10 + j].value().color);
-                r.vertices[quads * 4 + 1] = Vertex(j + 1, i, field[i * 10 + j].value().color);
-                r.vertices[quads * 4 + 2] = Vertex(j + 1, i + 1, field[i * 10 + j].value().color);
-                r.vertices[quads * 4 + 3] = Vertex(j, i + 1, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 4] = Vertex(j, i, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 5] = Vertex(j + 1, i, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 6] = Vertex(j + 1, i + 1, field[i * 10 + j].value().color);
+                r.vertices[quads * 4 + 7] = Vertex(j, i + 1, field[i * 10 + j].value().color);
                 quads++;
             }
         }
     }
     r.UploadVertices();
     r.Clear();
-    r.Draw(quads);
+    r.Draw(quads + 1);
 }
 
 int main(int argc, const char * argv[]) {
@@ -126,36 +130,25 @@ int main(int argc, const char * argv[]) {
             if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() >= OffsetTime)
             {
                 start = std::chrono::high_resolution_clock::now();
-                Drop();
-                
-                for (int i = 15; i >= 0; i--)
-                {
-                    for (int j = 0; j < 10; j++)
-                    {
-                        std::cout << field[i * 10 + j].has_value() << " ";
-                    }
-                    std::cout << std::endl;
-                }
-                std::cout << std::endl;
                 
                 bool s = false;
                 repeat:
-                for (int i = 0; i < falling_construction.bottom_blocks_size; i++)
+                for (int i = 0; i < falling_construction.size; i++)
                 {
-                    Block &block = field[(*falling_construction.bottom_blocks[i])->position[1] * 10 + (*falling_construction.bottom_blocks[i])->position[0]].value();
-                    if (field[(block.position[1] - 1) * 10 + block.position[0]] || !block.position[1])
+                    Block &block = field[falling_construction.blocks[i]->position[1] * 10 + falling_construction.blocks[i]->position[0]].value();
+                    if ((field[(block.position[1] - 1) * 10 + block.position[0]] && !IsFalling(block.position[0], block.position[1] - 1)) || !block.position[1])
                     {
                         if (s)
                             std::exit(0);
                         s = true;
                         GenConstruction();
+                        CheckFullRow();
                         goto repeat;
                         break;
                     }
                 }
+                Drop();
             }
-            
-            CheckFullRow();
             
             Display(renderer);
             
@@ -168,6 +161,7 @@ int main(int argc, const char * argv[]) {
 
 void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int &height)
 {
+    std::srand(std::time(NULL));
     field = new std::optional<Block>[16 * 10];
     for (int i = 0; i < 160; i++)
         field[i].reset();
@@ -199,7 +193,7 @@ void Init(SDL_Window *&w, SDL_GLContext &cont, unsigned int &width, unsigned int
         std::exit(1);
     }
     
-    glClearColor(0, 0, 0, 1);
+    glClearColor(1, 1, 1, 1);
 }
 
 void Shutdown(SDL_Window *&w, SDL_GLContext &cont)

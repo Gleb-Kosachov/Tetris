@@ -21,8 +21,6 @@ struct Construction
 {
     Block **blocks = nullptr;
     int size = 0;
-    Block ***bottom_blocks = nullptr;
-    int bottom_blocks_size = 0;
     Block **rotation_axis;
     int type;
     ~Construction();
@@ -31,6 +29,7 @@ struct Construction
 void GenConstruction();
 void CheckFullRow();
 void Drop();
+bool IsFalling(int x, int y);
 
 void HandleLeft();
 void HandleRight();
